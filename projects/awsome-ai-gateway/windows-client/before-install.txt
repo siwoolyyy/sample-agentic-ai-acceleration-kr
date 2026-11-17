@@ -1,0 +1,16 @@
+﻿AWSome Gateway
+
+This installer includes Python and the Gateway authentication helper.
+Git, Python and terminal commands are not required on the user's PC.
+Claude Desktop must already be installed separately.
+
+The Desktop configuration task changes machine-wide Claude policy for all users
+and sends model requests to the company Gateway. Existing conflicting policy is
+not overwritten. Contact IT if you already have an organization-managed policy.
+
+Passwords and personal API keys are not included. Log in with your own Cognito
+account after installation. Start this installer normally and allow UAC when
+asked. Run the LOGIN app as your normal user, not as administrator or SYSTEM.
+
+Before uninstalling: log out in the Gateway login app and fully quit Claude.
+Server-side key revocation is a separate administrator action.

@@ -1,0 +1,55 @@
+name: Windows Gateway user installer
+on:
+  push:
+    branches: ['build/windows-client-*']
+    paths:
+      - 'projects/awsome-ai-gateway/windows-client/**'
+      - '.github/workflows/windows-gateway-installer.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: projects/awsome-ai-gateway/windows-client
+    env:
+      GATEWAY_URL: https://d3o0i8nq4xi4k4.cloudfront.net
+      GATEWAY_ADMIN_API_URL: https://d3o0i8nq4xi4k4.cloudfront.net
+      GATEWAY_ISSUER: https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_XPlarTmJ3
+      GATEWAY_CLIENT_ID: 52m5ri9v4u79qmdj7e2avu9u4o
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare Inno Setup
+        run: choco upgrade innosetup -y --no-progress
+      - name: Install build dependencies
+        run: python -m pip install ../gateway-cli -r requirements-build.txt
+      - name: Run safety tests
+        run: python -m unittest discover -s tests -v
+      - name: Build installer
+        run: python build.py
+      - name: Test installer in a clean Windows Sandbox-like directory
+        shell: pwsh
+        run: |
+          $setup = Join-Path $PWD 'dist\AWSomeGatewaySetup-Windows-x64.exe'
+          $dest = Join-Path $env:RUNNER_TEMP 'GatewayInstallerSmoke'
+          $log = Join-Path $env:RUNNER_TEMP 'gateway-install.log'
+          # Do not select Desktop policy and do not open a browser during CI.
+          $p = Start-Process -FilePath $setup -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=', ('/DIR="' + $dest + '"'), ('/LOG="' + $log + '"')) -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Get-Content $log; throw "Installer failed: $($p.ExitCode)" }
+          & (Join-Path $dest 'helper\api-key-helper.exe') --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'Installed helper failed' }
+          $gui = Start-Process -FilePath (Join-Path $dest 'login\GatewayLogin.exe') -ArgumentList '--self-test' -Wait -PassThru
+          if ($gui.ExitCode -ne 0) { throw 'Installed login GUI dependencies failed' }
+          $p = Start-Process -FilePath (Join-Path $dest 'unins000.exe') -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw 'Uninstall failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-user-installer
+          path: projects/awsome-ai-gateway/windows-client/dist/*
+          if-no-files-found: error
+          retention-days: 14
