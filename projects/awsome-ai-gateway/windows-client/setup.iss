@@ -1,14 +1,14 @@
 ﻿[Setup]
 AppId={{D244F39D-2828-4504-8291-38511F96D581}
 AppName=AWSome Gateway
-AppVersion=0.1.0
+AppVersion=0.1.1
 DefaultDirName={autopf}\AWSomeGateway
 DefaultGroupName=AWSome Gateway
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={#Out}
-OutputBaseFilename=AWSomeGatewaySetup-Windows-x64
+OutputBaseFilename=AWSomeGatewaySetup-Windows-x64-v0.1.1
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -23,7 +23,7 @@ Name: "korean"; MessagesFile: "compiler:Languages\Korean.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: desktop; Description: "Configure Claude Desktop for the company Gateway (all users of this PC)"; Flags: checkedonce
+Name: desktop; Description: "Configure Claude Desktop for the company Gateway (all users of this PC)"
 
 [Files]
 Source: "{#Stage}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

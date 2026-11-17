@@ -16,7 +16,7 @@ def main():
     stage=ROOT/'build/stage';stage.mkdir(parents=True,exist_ok=True)
     config=dict(issuer=os.environ['GATEWAY_ISSUER'],client_id=os.environ['GATEWAY_CLIENT_ID'],
         gateway_url=os.environ['GATEWAY_URL'],admin_api_url=os.environ['GATEWAY_ADMIN_API_URL'],
-        models=['claude-haiku-4-5-20251001'])
+        models=['claude-haiku-5-5','claude-sonnet-5-5','claude-opus-5-5','claude-sonnet-5','claude-opus-5'])
     (stage/'site-config.json').write_text(json.dumps(config,indent=2),encoding='utf-8')
     read_config(stage)
     for script,name,folder,gui in [('helper.py','api-key-helper','helper',False),('login.py','GatewayLogin','login',True)]:
@@ -36,7 +36,7 @@ def main():
     if not iscc:raise SystemExit('Inno Setup compiler was not found')
     out=ROOT/'dist';out.mkdir(exist_ok=True)
     run(iscc,'/DStage='+str(stage),'/DOut='+str(out),ROOT/'setup.iss')
-    exe=out/'AWSomeGatewaySetup-Windows-x64.exe'
+    exe=out/'AWSomeGatewaySetup-Windows-x64-v0.1.1.exe'
     exe.with_suffix('.exe.sha256').write_text(hashlib.sha256(exe.read_bytes()).hexdigest()+'  '+exe.name+'\n')
     print('CREATED:',exe)
 

@@ -35,7 +35,7 @@ jobs:
       - name: Test installer in a clean Windows Sandbox-like directory
         shell: pwsh
         run: |
-          $setup = Join-Path $PWD 'dist\AWSomeGatewaySetup-Windows-x64.exe'
+          $setup = Join-Path $PWD 'dist\AWSomeGatewaySetup-Windows-x64-v0.1.1.exe'
           $dest = Join-Path $env:RUNNER_TEMP 'GatewayInstallerSmoke'
           $log = Join-Path $env:RUNNER_TEMP 'gateway-install.log'
           # Do not select Desktop policy and do not open a browser during CI.
