@@ -51,8 +51,9 @@ jobs:
           if ((Get-Item $policyPath).GetValueKind('coworkEgressAllowedHosts') -ne 'String') { throw 'Egress policy must be REG_SZ' }
           $p = Start-Process -FilePath (Join-Path $dest 'unins000.exe') -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw 'Uninstall failed' }
-          $remaining = Get-ItemPropertyValue -Path $policyPath -Name coworkEgressAllowedHosts -ErrorAction SilentlyContinue
-          if ($null -ne $remaining) { throw 'Installer-owned egress policy was not removed' }
+          if (Test-Path $policyPath) {
+            if ((Get-Item $policyPath).GetValueNames() -contains 'coworkEgressAllowedHosts') { throw 'Installer-owned egress policy was not removed' }
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: Windows-user-installer
