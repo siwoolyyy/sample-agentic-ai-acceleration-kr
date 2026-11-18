@@ -1,14 +1,14 @@
 ﻿[Setup]
 AppId={{D244F39D-2828-4504-8291-38511F96D581}
 AppName=AWSome Gateway
-AppVersion=0.1.1
+AppVersion=0.1.2
 DefaultDirName={autopf}\AWSomeGateway
 DefaultGroupName=AWSome Gateway
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={#Out}
-OutputBaseFilename=AWSomeGatewaySetup-Windows-x64-v0.1.1
+OutputBaseFilename=AWSomeGatewaySetup-Windows-x64-v0.1.2
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

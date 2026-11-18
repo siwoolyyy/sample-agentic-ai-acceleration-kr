@@ -35,18 +35,24 @@ jobs:
       - name: Test installer in a clean Windows Sandbox-like directory
         shell: pwsh
         run: |
-          $setup = Join-Path $PWD 'dist\AWSomeGatewaySetup-Windows-x64-v0.1.1.exe'
+          $setup = Join-Path $PWD 'dist\AWSomeGatewaySetup-Windows-x64-v0.1.2.exe'
           $dest = Join-Path $env:RUNNER_TEMP 'GatewayInstallerSmoke'
           $log = Join-Path $env:RUNNER_TEMP 'gateway-install.log'
-          # Do not select Desktop policy and do not open a browser during CI.
-          $p = Start-Process -FilePath $setup -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=', ('/DIR="' + $dest + '"'), ('/LOG="' + $log + '"')) -Wait -PassThru
+          # Apply this installer's policy on the disposable runner, verify it, then restore. No browser login.
+          $p = Start-Process -FilePath $setup -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=desktop', ('/DIR="' + $dest + '"'), ('/LOG="' + $log + '"')) -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content $log; throw "Installer failed: $($p.ExitCode)" }
           & (Join-Path $dest 'helper\api-key-helper.exe') --self-test
           if ($LASTEXITCODE -ne 0) { throw 'Installed helper failed' }
           $gui = Start-Process -FilePath (Join-Path $dest 'login\GatewayLogin.exe') -ArgumentList '--self-test' -Wait -PassThru
           if ($gui.ExitCode -ne 0) { throw 'Installed login GUI dependencies failed' }
+          $policyPath = 'HKLM:\SOFTWARE\Policies\Claude'
+          $egress = Get-ItemPropertyValue -Path $policyPath -Name coworkEgressAllowedHosts
+          if ($egress -cne '["*"]') { throw 'Egress wildcard policy was not applied' }
+          if ((Get-Item $policyPath).GetValueKind('coworkEgressAllowedHosts') -ne 'String') { throw 'Egress policy must be REG_SZ' }
           $p = Start-Process -FilePath (Join-Path $dest 'unins000.exe') -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw 'Uninstall failed' }
+          $remaining = Get-ItemPropertyValue -Path $policyPath -Name coworkEgressAllowedHosts -ErrorAction SilentlyContinue
+          if ($null -ne $remaining) { throw 'Installer-owned egress policy was not removed' }
       - uses: actions/upload-artifact@v4
         with:
           name: Windows-user-installer

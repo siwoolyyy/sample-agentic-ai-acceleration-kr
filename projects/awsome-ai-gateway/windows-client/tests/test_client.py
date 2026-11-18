@@ -83,4 +83,34 @@ class ClientTests(unittest.TestCase):
             with contextlib.redirect_stdout(out):module.main()
             self.assertEqual(out.getvalue(),'test-token-not-real\n')
 
+
+class EgressUpgradeTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
+        self.config=dict(issuer='https://idp.example.com',client_id='test',gateway_url='https://gateway.example.com',admin_api_url='https://gateway.example.com',models=['haiku-test'])
+        (self.root/'site-config.json').write_text(json.dumps(self.config))
+    def tearDown(self):self.temp.cleanup()
+    def test_wildcard_is_json_string_in_registry(self):
+        w=FakeRegistry()
+        with patch.dict(sys.modules,{'winreg':w}):
+            clientlib.install_policy(self.root)
+            self.assertEqual(w.values['coworkEgressAllowedHosts'],['["*"]',w.REG_SZ])
+            clientlib.remove_policy(self.root)
+            self.assertNotIn('coworkEgressAllowedHosts',w.values)
+    def test_upgrade_restores_preexisting_unowned_allowlist(self):
+        original_policy=clientlib.policy
+        old_policy=original_policy(self.config,self.root)
+        old_policy.pop('coworkEgressAllowedHosts')
+        w=FakeRegistry()
+        with patch.dict(sys.modules,{'winreg':w}):
+            with patch.object(clientlib,'policy',return_value=old_policy):
+                clientlib.install_policy(self.root)
+            # A separately managed value predates adoption of the new installer key.
+            baseline=['["*.company.example.com"]',w.REG_SZ]
+            w.values['coworkEgressAllowedHosts']=baseline.copy()
+            clientlib.install_policy(self.root)
+            self.assertEqual(w.values['coworkEgressAllowedHosts'],['["*"]',w.REG_SZ])
+            clientlib.remove_policy(self.root)
+            self.assertEqual(w.values,{'coworkEgressAllowedHosts':baseline})
+
 if __name__=='__main__':unittest.main()

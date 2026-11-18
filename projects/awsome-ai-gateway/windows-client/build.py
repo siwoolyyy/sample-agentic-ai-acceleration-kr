@@ -36,7 +36,7 @@ def main():
     if not iscc:raise SystemExit('Inno Setup compiler was not found')
     out=ROOT/'dist';out.mkdir(exist_ok=True)
     run(iscc,'/DStage='+str(stage),'/DOut='+str(out),ROOT/'setup.iss')
-    exe=out/'AWSomeGatewaySetup-Windows-x64-v0.1.1.exe'
+    exe=out/'AWSomeGatewaySetup-Windows-x64-v0.1.2.exe'
     exe.with_suffix('.exe.sha256').write_text(hashlib.sha256(exe.read_bytes()).hexdigest()+'  '+exe.name+'\n')
     print('CREATED:',exe)
 

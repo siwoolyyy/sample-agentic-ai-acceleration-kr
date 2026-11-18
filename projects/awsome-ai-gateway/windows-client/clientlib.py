@@ -42,7 +42,8 @@ def policy(config, root=None):
         inferenceCredentialKind='helper-script', inferenceGatewayBaseUrl=config['gateway_url'],
         inferenceGatewayAuthScheme='bearer',
         inferenceCredentialHelper=str((root or root_dir())/'helper/api-key-helper.exe'),
-        inferenceCredentialHelperTtlSec=1800, inferenceModels=json.dumps(config['models']))
+        inferenceCredentialHelperTtlSec=1800, inferenceModels=json.dumps(config['models']),
+        coworkEgressAllowedHosts=json.dumps(['*']))
 
 
 def registry_read(w, name):
@@ -76,7 +77,11 @@ def install_policy(root=None):
         for k,v in state['applied'].items():
             if registry_read(w,k)!=v:
                 raise ValueError('다른 관리자가 변경한 Claude 정책은 덮어쓰지 않습니다.')
-        before=state['before']
+        before=dict(state['before'])
+        # Preserve baseline values for policy keys introduced by an upgrade.
+        for name in values:
+            if name not in before:
+                before[name]=registry_read(w,name)
     else:
         try:
             with w.OpenKey(w.HKEY_LOCAL_MACHINE,POLICY_KEY,0,w.KEY_READ|w.KEY_WOW64_64KEY) as key:

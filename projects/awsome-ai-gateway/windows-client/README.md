@@ -1,11 +1,11 @@
 # Windows 사용자 설치 프로그램
 
-사용자에게 전달할 파일: **`AWSomeGatewaySetup-Windows-x64-v0.1.1.exe`**. 빌드 키트가 아니다.
+사용자에게 전달할 파일: **`AWSomeGatewaySetup-Windows-x64-v0.1.2.exe`**. 빌드 키트가 아니다.
 
 ## 사용자 설치
 
 1. Claude Desktop을 먼저 설치한다.
-2. `AWSomeGatewaySetup-Windows-x64-v0.1.1.exe`를 일반 사용자 계정에서 더블클릭하고 UAC 요청을 승인한다.
+2. `AWSomeGatewaySetup-Windows-x64-v0.1.2.exe`를 일반 사용자 계정에서 더블클릭하고 UAC 요청을 승인한다.
 3. Claude Desktop 연결 항목은 이 PC의 모든 사용자에게 회사 Gateway를 적용한다. 내용을 확인한 뒤 설치한다.
 4. 완료 후 **AWSome Gateway Login**을 열고 **회사 계정 로그인**을 누른다.
 5. 브라우저에서 본인 Cognito 이메일/비밀번호로 로그인한다. 비밀번호는 설치 파일에 들어 있지 않다.
@@ -39,6 +39,12 @@ CI가 확인하는 것은 실행파일 생성·설치·의존성·제거다. 실
 
 로그인 앱에서 로그아웃하고 Claude를 종료한 뒤 Windows 설정의 앱 목록에서 제거한다. 이 설치 프로그램이 넣은 정책만 복원하며, 이후 다른 관리자가 바꾼 값은 유지한다. 서버의 발급 키를 즉시 폐기하려면 관리자에게 요청한다.
 
-## v0.1.1 모델 목록 수정
+## v0.1.2 모델 목록 수정
 
 현재 팀에 허용된 5·5.5 모델 목록을 제공한다. 기본 모델은 서울 Bedrock에서 호출을 확인한 `claude-haiku-5-5`다. 이전 버전의 4.5 고정 목록을 교체한다. 같은 AppId로 업데이트 설치하고 Desktop 연결 항목을 선택한 뒤 Claude를 완전히 종료하고 새 대화를 시작한다. 서버 권한 정책은 변경하지 않는다.
+
+## v0.1.2 도메인 접근 허용
+
+Windows Claude 정책에 `coworkEgressAllowedHosts`를 JSON 문자열 `["*"]`(REG_SZ)로 추가한다. 회사 네트워크/방화벽이 허용하는 전체 도메인에 샌드박스가 접근할 수 있다. 웹검색 provider 활성화, 파일 권한 변경, 도구 승인 우회는 하지 않는다. 기존 버전 위에 업데이트 설치하고 Desktop 연결 항목을 선택한 뒤 Claude를 완전히 종료해 다시 연다. 업그레이드 전에 이 키가 별도로 있었다면 그 값을 백업하고 제거 시 복원한다.
+
+공식 규격: https://claude.com/docs/third-party/claude-desktop/configuration#coworkegressallowedhosts

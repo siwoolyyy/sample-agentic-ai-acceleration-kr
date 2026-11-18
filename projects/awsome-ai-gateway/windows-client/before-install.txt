@@ -14,3 +14,8 @@ asked. Run the LOGIN app as your normal user, not as administrator or SYSTEM.
 
 Before uninstalling: log out in the Gateway login app and fully quit Claude.
 Server-side key revocation is a separate administrator action.
+
+Network access: this version sets coworkEgressAllowedHosts to ["*"].
+This permits Claude sandbox outbound connections to all domains your network
+allows. It does not enable a WebSearch provider, disable your firewall, change
+file permissions, or bypass separate tool approvals.
